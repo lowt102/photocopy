@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đặt in tài liệu online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  fontFamily: { sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'] },
+  colors: { cyan: { print: '#0091C7' } }
+} } };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--c:#0091C7;--m:#E5007D;--y:#FFD500;--k:#10151F;--line:#DCE1E8;--mute:#5E6B7C;--bg:#F1F4F8}
+body{background:var(--bg);color:var(--k);font-family:"Be Vietnam Pro",system-ui,sans-serif}
+.hero{background:var(--k);color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,var(--c) 0 34%,transparent 35%),radial-gradient(circle at 70% 40%,var(--m) 0 30%,transparent 31%),radial-gradient(circle at 45% 75%,var(--y) 0 28%,transparent 29%);
+  opacity:.9;mix-blend-mode:screen}
+.reg{display:flex;gap:6px;align-items:center}.reg i{width:12px;height:12px;border-radius:50%;display:block}
+.step{display:flex;align-items:center;gap:10px;font-size:.85rem;color:#C9D2DE}
+.step b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;color:var(--k);font-size:.8rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 0 rgba(16,21,31,.04),0 8px 24px -16px rgba(16,21,31,.25)}
+.sec-title{font-weight:800;font-size:1.05rem;margin-bottom:.75rem}
+.drop{display:block;text-align:center;cursor:pointer;border:2px dashed #B9C4D2;border-radius:14px;padding:2.25rem 1rem;background:linear-gradient(#F8FAFC,#fff);transition:.15s}
+.drop:hover,.drop.border-cyan-print{border-color:var(--c);background:#EAF7FC}
+.drop svg{margin:0 auto .5rem;color:var(--c)}
+.opt input:checked + span{background:var(--k);color:#fff;border-color:var(--k)}
+.opt span{display:block;text-align:center;padding:.6rem .5rem;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-size:.9rem;font-weight:500;background:#fff;transition:.12s}
+.opt span:hover{border-color:var(--k)}
+.opt input:focus-visible + span,.field:focus-visible,#submitBtn:focus-visible,.nav-btn:focus-visible{outline:3px solid var(--c);outline-offset:2px}
+.lbl{display:block;font-weight:600;font-size:.88rem;margin-bottom:.4rem}
+.field{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:.65rem .8rem;background:#fff;font-size:.95rem}
+.field:focus{border-color:var(--c);outline:none}
+.nav-btn{width:36px;height:36px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:1.1rem}
+.nav-btn:hover{border-color:var(--k)}
+#submitBtn{background:linear-gradient(135deg,var(--c),#0078A8);color:#fff;font-weight:700;border-radius:12px;padding:.95rem;width:100%;margin-top:1rem;font-size:1rem;transition:.15s}
+#submitBtn:disabled{background:#C5CDD8;cursor:not-allowed}
+#submitBtn:not(:disabled):hover{filter:brightness(1.08)}
+.total{background:var(--k);color:#fff;border-radius:12px;padding:.9rem 1rem;display:flex;justify-content:space-between;align-items:baseline;margin-top:.75rem}
+.total b{font-size:1.7rem;font-weight:800}
+.qrwrap{background:#fff;border:2px solid var(--k);border-radius:16px;padding:10px;display:inline-block}
+.hint{background:#F8FAFC;border:1px solid var(--line);border-radius:12px;padding:.75rem .9rem;font-size:.85rem;color:#344054;margin-top:.9rem}
+.hint summary{font-weight:600;cursor:pointer}
+@media(min-width:1024px){.sticky-col{position:sticky;top:16px;align-self:start}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body class="min-h-screen">
+<header class="hero">
+  <div class="max-w-5xl mx-auto px-4 pt-6 pb-7 relative z-10">
+    <div class="reg mb-4" aria-hidden="true"><i style="background:var(--c)"></i><i style="background:var(--m)"></i><i style="background:var(--y)"></i><i style="background:#fff"></i></div>
+    <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight" id="shopName">Đặt in online</h1>
+    <p class="mt-2 text-slate-300 max-w-md">Tải file lên, chuyển khoản, rồi đến quán lấy bản in. Không cần xếp hàng.</p>
+    <div class="mt-5 flex flex-wrap gap-x-6 gap-y-2">
+      <div class="step"><b>1</b>Tải file PDF</div>
+      <div class="step"><b>2</b>Chọn kiểu in</div>
+      <div class="step"><b>3</b>Chuyển khoản</div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-6 grid lg:grid-cols-5 gap-5">
+  <section class="lg:col-span-3 space-y-5">
+    <div class="card p-5" id="uploadCard">
+      <h2 class="sec-title">Tài liệu của bạn</h2>
+      <label for="fileInput" id="dropzone" class="drop">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        <p class="font-semibold">Chọn hoặc kéo thả file PDF vào đây</p>
+        <p class="text-sm text-slate-500 mt-1">Tối đa <span id="maxMb">50</span> MB</p>
+      </label>
+      <input id="fileInput" type="file" accept="application/pdf,.pdf" class="sr-only">
+      <div id="progressBox" class="mt-4" hidden>
+        <div class="flex justify-between text-sm font-medium"><span id="progressLabel">Đang phân tích...</span><span id="progressPct" class="tabular-nums">0%</span></div>
+        <div class="h-2 bg-slate-200 rounded-full mt-1.5 overflow-hidden"><div id="progressBar" class="h-2 rounded-full" style="width:0%;background:linear-gradient(90deg,var(--c),var(--m))"></div></div>
+      </div>
+      <p id="fileError" class="mt-3 text-sm text-red-700 font-medium bg-red-50 border border-red-200 rounded-lg p-3" role="alert" hidden></p>
+      <details class="hint">
+        <summary>Chưa có file PDF? Xem cách đổi (rất nhanh)</summary>
+        <div class="mt-2 space-y-2">
+          <p><b>Word, PowerPoint, Excel trên máy tính:</b> bấm <b>File</b>, chọn <b>Lưu thành</b> (Save As) hoặc <b>Xuất</b> (Export), rồi chọn <b>PDF</b>. Cách này giữ đúng bố cục, tránh nhảy trang.</p>
+          <p><b>Google Docs / Google Slides:</b> bấm <b>Tệp</b>, chọn <b>Tải xuống</b>, rồi chọn <b>PDF</b>.</p>
+          <p><b>Ảnh hoặc file trên điện thoại:</b> vào một trang đổi miễn phí, chọn file, bấm chuyển, rồi tải PDF về:</p>
+          <ul class="list-disc pl-5">
+            <li><a class="underline text-cyan-print font-medium" href="https://www.ilovepdf.com/jpg_to_pdf" target="_blank" rel="noopener">Ảnh sang PDF</a></li>
+            <li><a class="underline text-cyan-print font-medium" href="https://www.ilovepdf.com/word_to_pdf" target="_blank" rel="noopener">Word sang PDF</a></li>
+            <li><a class="underline text-cyan-print font-medium" href="https://www.ilovepdf.com/powerpoint_to_pdf" target="_blank" rel="noopener">PowerPoint sang PDF</a></li>
+          </ul>
+          <p class="text-xs text-slate-500">Tài liệu riêng tư (giấy tờ, hợp đồng) nên đổi bằng Word hoặc Google Docs, không tải lên web khác. Không làm được thì mang file tới quán, nhân viên sẽ giúp.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card p-5" id="previewCard" hidden>
+      <div class="flex items-center justify-between mb-3 gap-3">
+        <p class="font-semibold truncate" id="fileName">file.pdf</p>
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="prevPage" type="button" class="nav-btn" aria-label="Trang trước">‹</button>
+          <span class="text-sm tabular-nums w-14 text-center" id="pageInfo">1 / 1</span>
+          <button id="nextPage" type="button" class="nav-btn" aria-label="Trang sau">›</button>
+        </div>
+      </div>
+      <div class="rounded-xl p-3 overflow-auto flex justify-center max-h-[70vh]" style="background:#E6EBF1">
+        <canvas id="previewCanvas" class="bg-white" style="box-shadow:0 6px 20px -8px rgba(16,21,31,.45)"></canvas>
+      </div>
+      <p class="text-sm mt-3 text-slate-600" id="pageInk"></p>
+    </div>
+
+    <div id="copyrightBox" class="rounded-2xl border border-red-300 bg-red-50 text-red-900 p-4 text-sm" role="alert" hidden>
+      <p class="font-semibold">Lưu ý bản quyền</p>
+      <p class="mt-1">File này có dấu hiệu là sách đã xuất bản (<span id="copyrightKeywords"></span>) và dài hơn 30 trang. Luật chỉ cho phép sao chép một phần nhỏ (khoảng 10%) của một tác phẩm. Bạn vẫn có thể đặt in, nhưng chủ quán có thể từ chối đơn.</p>
+    </div>
+  </section>
+
+  <aside class="lg:col-span-2 space-y-5 sticky-col">
+    <form id="orderForm" class="card p-5 space-y-4" novalidate>
+      <h2 class="sec-title !mb-0">Kiểu in</h2>
+      <fieldset>
+        <legend class="lbl">Khổ giấy</legend>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="opt"><input class="sr-only" type="radio" name="paper" value="A4" checked><span>A4</span></label>
+          <label class="opt"><input class="sr-only" type="radio" name="paper" value="A3"><span>A3 (giá gấp đôi)</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend class="lbl">Số mặt</legend>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="opt"><input class="sr-only" type="radio" name="duplex" value="simplex" checked><span>1 mặt</span></label>
+          <label class="opt"><input class="sr-only" type="radio" name="duplex" value="duplex"><span>2 mặt</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend class="lbl">Màu sắc</legend>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="opt"><input class="sr-only" type="radio" name="color" value="bw" checked><span>Trắng đen</span></label>
+          <label class="opt"><input class="sr-only" type="radio" name="color" value="color"><span>In màu</span></label>
+        </div>
+      </fieldset>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="copies" class="lbl">Số bản</label>
+          <input id="copies" name="copies" type="number" min="1" max="200" value="1" inputmode="numeric" class="field">
+        </div>
+        <div>
+          <label for="binding" class="lbl">Gia công</label>
+          <select id="binding" name="binding" class="field"></select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200">
+        <div>
+          <label for="customerName" class="lbl">Tên bạn</label>
+          <input id="customerName" class="field" maxlength="40" autocomplete="name" placeholder="Nguyễn An">
+        </div>
+        <div>
+          <label for="phoneLast4" class="lbl">4 số cuối SĐT</label>
+          <input id="phoneLast4" class="field" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" placeholder="1234">
+        </div>
+      </div>
+    </form>
+
+    <div class="card p-5" id="summaryCard">
+      <h2 class="sec-title">Chi tiết đơn</h2>
+      <p class="text-sm text-slate-500" id="summaryEmpty">Tải file PDF lên để xem giá.</p>
+      <dl id="summaryList" class="text-sm space-y-1.5" hidden></dl>
+      <div class="total"><span class="font-medium">Tổng tiền</span><b class="tabular-nums" id="totalPrice">0đ</b></div>
+      <button id="submitBtn" type="button" disabled>Xác nhận & thanh toán</button>
+      <p id="submitError" class="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3" role="alert" hidden></p>
+    </div>
+
+    <div class="card p-5 text-center" id="paymentCard" hidden>
+      <p class="text-sm text-slate-500">Mã đơn của bạn</p>
+      <p class="text-4xl font-extrabold tracking-wider" id="orderIdText">IN0000</p>
+      <div id="qrBox">
+        <div class="qrwrap mt-3"><img id="qrImage" alt="Mã QR chuyển khoản" class="w-60 max-w-full rounded-lg"></div>
+        <p class="text-sm mt-3">Quét bằng app ngân hàng. Số tiền và nội dung đã điền sẵn, vui lòng không sửa.</p>
+        <p class="text-sm mt-2 font-semibold" id="payInfo"></p>
+      </div>
+      <div id="statusBox" class="mt-4 rounded-lg p-3 text-sm font-medium bg-slate-100">Đang chờ thanh toán...</div>
+      <button id="newOrderBtn" type="button" class="mt-3 text-sm underline text-cyan-print font-medium" hidden>Tạo đơn mới</button>
+    </div>
+  </aside>
+</main>
+
+<footer class="max-w-5xl mx-auto px-4 pb-8 text-xs text-slate-500">File của bạn được xóa sau khi in xong.</footer>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
